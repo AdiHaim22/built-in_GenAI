@@ -1,82 +1,76 @@
-🏗️ Built-In: GenAI System for Verifying Compliance Between Floorplan Versions
-A GenAI-Based System for Detecting Structural Changes Between Floorplan Versions
+🏗️ Built-In: A GenAI System for Floorplan Version Compliance
+Detecting Structural Changes Between Two Versions of Apartment Floorplans
 
 Authors: Afik Aharon, Adi Haim, Liran Aichnboim
 
-📌 1. Project Overview
+✨ 1. Project Overview
 
-Real-estate buyers often receive multiple versions of the same apartment floorplan (e.g., early contractor plans vs. revised plans).
-Small, non-transparent changes can introduce financial risk, reduced square footage, or legal issues, yet there is no existing tool allowing buyers to verify changes easily.
+Real-estate buyers often receive multiple versions of the same apartment floorplan.
+Minor changes between versions may lead to financial loss, reduced area, or legal implications, yet buyers have no automated way to validate differences.
 
-Built-In is a computer-vision and generative-AI based system that automatically detects meaningful structural differences between two versions of the same floorplan.
+Built-In provides an AI-driven solution that automatically detects whether two floorplans differ structurally.
 
 🎯 2. Problem Statement
 
-Automatically detect and report differences between two versions of the same floorplan (1–2 bedroom units).
+Automatically detect and report meaningful changes between two versions of the same floorplan (1–2 bedroom units).
 
 Inputs
 
-Two floorplan images (Version A, Version B)
+Two floorplan images (Version A + Version B)
 
 Output
+Output	Meaning
+0	No meaningful change (stylistic differences only)
+1	Structural modification detected
+Novelty
 
-0 → No meaningful structural change (stylistic only)
+First buyer-oriented comparison approach.
 
-1 → Structural modification detected
+Uses CV feature extraction, Generative AI, and synthetic data generation.
 
-Project Novelty
+🔧 3. Models & Methods
+Pipeline
+       ┌──────────────────────┐
+       │  Stage 1: Preprocess │
+       │ Inpainting + LoRA    │
+       └───────────┬──────────┘
+                   ↓
+       ┌──────────────────────┐
+       │ Stage 2: Synthetic   │
+       │   Data Generation    │
+       └───────────┬──────────┘
+                   ↓
+       ┌──────────────────────┐
+       │ Stage 3: Feature     │
+       │ Extraction (CNN/VIT) │
+       └───────────┬──────────┘
+                   ↓
+       ┌──────────────────────┐
+       │ Stage 4: Embedding   │
+       │ Comparison + Classif │
+       └──────────────────────┘
 
-First buyer-oriented floorplan comparison tool.
+Techniques Used
 
-Combines CV feature extraction, generative synthetic data, diffusion-based inpainting, and Light LoRA fine-tuning.
+Inpainting (diffusion + prompt engineering)
 
-🔧 3. Pipeline: Models & Methods
-Stage 1: Input Preprocessing
+Feature extraction via CNN & ViT encoders
 
-Inpainting for generating controlled modifications
+Binary classifier for structural change
 
-Light LoRA fine-tuning for domain adaptation
-
-Stage 2: Synthetic Data Creation
-
-Generate multiple versions of the same apartment plan
-
-Create both unchanged pairs and changed pairs
-
-Stage 3: Feature Extraction
-
-CNN encoders
-
-ViT (Vision Transformer) encoders
-
-Output: embeddings representing layout structure
-
-Stage 4: Comparison & Classification
-
-Compare embeddings between plan versions
-
-Binary classifier predicts structural change (1) or no change (0)
-
-Adjustments & Fine-Tuning
-
-Prompt-controlled inpainting for realistic modifications
+Light LoRA domain fine-tuning
 
 Threshold calibration
-
-Classifier optimization
 
 📊 4. Data Specification & Generation
 Base Dataset
 
-FloorPlansV2 (HuggingFace) — filtered subset
+FloorPlansV2 (HuggingFace) – filtered subset
 
-
-Labeling
-
-0 → stylistic only
-
-1 → structural change
-
+Labeling Scheme
+Label	Meaning
+0	Stylistic differences only
+1	Structural modification
 Synthetic Data Requirements
 
 1–2 room apartments
@@ -87,37 +81,39 @@ Paired samples for training
 
 Generated Data Types
 
-No-Change Pairs (A and A’)
+No-change pairs (A → A’)
 
-Changed Pairs (A and modified A*)
+Changed pairs (A → A*)
 
 📈 5. Metrics & KPIs
-How We Evaluate
+Goal
 
-Ability to detect small, local structural changes
+Evaluate the model’s ability to detect:
 
-Accuracy vs. human-verified labels
+Small, local structural changes
 
-Performance of each individual step:
+True structural differences vs. stylistic noise
+
+Quality Per Pipeline Step
 
 Inpainting quality
 
-Embedding similarity stability
+Embedding stability (CNN/VIT)
 
-Classifier accuracy
+Classifier performance
 
-Protocols
+Evaluation Protocols
 
 Train/test split
 
 Cross-validation
 
-Paired before/after datasets
+Paired before/after floorplans
 
 KPIs
 
 Classification accuracy
 
-False positives/false negatives
+Sensitivity to small changes
 
-Sensitivity to minimal structural changes
+False positive / false negative rate
