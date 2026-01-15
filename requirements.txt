@@ -1,0 +1,14 @@
+torch
+torchvision
+torchaudio
+transformers
+diffusers
+accelerate
+safetensors
+huggingface-hub
+opencv-python
+pillow
+numpy
+scikit-learn
+matplotlib
+tqdm

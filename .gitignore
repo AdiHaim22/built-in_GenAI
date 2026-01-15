@@ -1,3 +1,14 @@
+# Virtual env
+.venv/
+
+# Heavy models
+Models/
+models/
+MODELS/
+
+# Optional: training checkpoints inside models
+**/checkpoint-*/
+
 #ignore these files
 outputs_toilet_to_stove/
 Models/
