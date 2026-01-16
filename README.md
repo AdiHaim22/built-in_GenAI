@@ -6,7 +6,7 @@ All models are hosted on **Hugging Face** and are downloaded automatically.
 
 ---
 
-## 📦 Required Models
+##  Required Models
 
 The following models are used in the project:
 
@@ -21,7 +21,7 @@ The following models are used in the project:
 
 ---
 
-## ⚙️ Automatic Installation (Recommended)
+##  Automatic Installation (Recommended)
 
 Run the setup script from the project root directory:
 
