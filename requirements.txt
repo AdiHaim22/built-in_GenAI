@@ -12,3 +12,8 @@ numpy
 scikit-learn
 matplotlib
 tqdm
+pandas
+scipy
+timm
+joblib
+segment-anything
