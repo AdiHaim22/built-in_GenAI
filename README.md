@@ -117,7 +117,7 @@ To evaluate the performance of the Change Type Classifier, we utilized standard 
 
 * **Confusion Matrix:** Analyzed to visualize the trade-off between "False Alarms" (False Positives) and "Missed Detections" (False Negatives) at the chosen threshold.
 
-![alt text](Visuals\confusion_matrix.png)
+![](Visuals\confusion_matrix.png)
 
 
 # 10. Results
