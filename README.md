@@ -148,6 +148,7 @@ We evaluated the proposed change detection pipeline on a held-out validation set
 
 # 11. Repository structure
 
+```bash
 Built-in 
 ├── Code/
 │   ├── Synthetic_Data_Generation.ipynb    # Generates synthetic training data (using DETR + SAM)
@@ -181,7 +182,7 @@ Built-in
 |
 ├── requirements.txt                      # List of Python dependencies
 └── README.md                                 # Project documentation
-
+```
 # 12. Team Members
 
 * Afik Aharon
