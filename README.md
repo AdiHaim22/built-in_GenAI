@@ -16,7 +16,7 @@ Homebuyers lack the tools and expertise to accurately identify structural or lay
 * We used [FloorPlansV2]('https://huggingface.co/datasets/jprve/FloorPlansV2') dataset after flitering 
 * We generated before/after dataset for the classification pipeline
 
-5. Data augmentation and generation methods
+# 5. Data augmentation and generation methods
 
 Synthetic Data Generation Pipeline To overcome the scarcity of labeled "Before/After" floor plan pairs, we developed an automated pipeline to generate synthetic architectural changes. The process consists of four stages:
 
