@@ -20,19 +20,23 @@ Homebuyers lack the tools and expertise to accurately identify structural or lay
 
 Synthetic Data Generation Pipeline To overcome the scarcity of labeled "Before/After" floor plan pairs, we developed an automated pipeline to generate synthetic architectural changes. The process consists of four stages:
 
-1. Object Detection: We utilized a fine-tuned DETR (DEtection TRansformer) model to identify semantic architectural elements (e.g., stoves, sinks, toilets, doors) within original floor plans.
+1. **Object Detection:** We utilized a fine-tuned DETR (DEtection TRansformer) model to identify semantic architectural elements (e.g., stoves, sinks, toilets, doors) within original floor plans.
 
-2. Semantic Segmentation: Detected bounding boxes were passed to the Segment Anything Model (SAM) to generate precise, pixel-perfect masks, isolating objects from the floor plan background.
+2. **Semantic Segmentation:** Detected bounding boxes were passed to the Segment Anything Model (SAM) to generate precise, pixel-perfect masks, isolating objects from the floor plan background.
 
-3. Image Manipulation: We applied programmatic transformations to simulate realistic renovations:
+3. **Image Manipulation:** We applied programmatic transformations to simulate realistic renovations:
 
-* Removal: Objects were digitally erased and inpainted with background textures.
+ * **Removal:** Objects were digitally erased and inpainted with background textures.
 
-* Addition: New objects (e.g., closets) were inserted using a logic-based algorithm that identifies valid wall-adjacent locations.
+ * **Addition:** New objects (e.g., closets) were inserted using a logic-based algorithm that identifies valid wall-adjacent locations.
 
-* Replacement: Functional fixtures (e.g., toilets) were swapped with other appliances (e.g., stoves) using a patch-based synthesis approach.
+ * **Replacement:** Functional fixtures (e.g., toilets) were swapped with other appliances (e.g., stoves) using a patch-based synthesis approach.
 
-4. Automated Labeling: Each generated pair was automatically labeled as "Substantial" or "Non-Substantial" based on the manipulation type, creating a fully annotated dataset for supervised learning.
+4. **Automated Labeling:** Each generated pair was automatically labeled as "Substantial" or "Non-Substantial" based on the manipulation type, creating a fully annotated dataset for supervised learning.
+
+ * **Substantial changes:** remove sink, stove, toilet. and replace sink to stove and toilet to stove .
+ 
+ * **Non-Substantial changes:** add closet at random location, remove door, remove 2 sided door and remove closet .
 
 
 # 6. Input/Output Examples
@@ -43,56 +47,56 @@ Synthetic Data Generation Pipeline To overcome the scarcity of labeled "Before/A
 
 # 7. Models and pipelines used 
 
-1. Synthetic Data Generation Pipeline
+1. **Synthetic Data Generation Pipeline**
 To address the lack of labeled architectural change datasets, we constructed a generative pipeline to create valid "Before & After" floor plan pairs:
 
-* Object Detection (DETR): We fine-tuned the DEtection TRansformer (DETR) model on a floor plan dataset to identify semantic entities such as stoves, sinks, toilets, and doors.
+ * **Object Detection (DETR):** We fine-tuned the DEtection TRansformer (DETR) model on a floor plan dataset to identify semantic entities such as stoves, sinks, toilets, and doors.
 
-* Semantic Segmentation (SAM): Detected bounding boxes were processed by the Segment Anything Model (SAM, ViT-H) to generate high-precision segmentation masks, enabling clean extraction of objects from the background.
+ * **Semantic Segmentation (SAM):** Detected bounding boxes were processed by the Segment Anything Model (SAM, ViT-H) to generate high-precision segmentation masks, enabling clean extraction of objects from the background.
 
-* Image Manipulation Engine: Custom Python scripts (using OpenCV and PIL) utilized the segmentation masks to algorithmically remove, replace, or add objects, automatically labeling each transformation as "Substantial" or "Non-Substantial."
+ * **Image Manipulation Engine:** Custom Python scripts (using OpenCV and PIL) utilized the segmentation masks to algorithmically remove, replace, or add objects, automatically labeling each transformation as "Substantial" or "Non-Substantial."
 
 2. Change Classification Pipeline
 The core system for detecting discrepancies in real-world scenarios operates as follows:
 
-* Parallel object Detection: The system processes both the "Original" and "Revised" floor plans in parallel using the fine-tuned DETR model to extract object layouts.
+ * **Parallel object Detection:** The system processes both the "Original" and "Revised" floor plans in parallel using the fine-tuned DETR model to extract object layouts.
 
-* Feature Extraction (Hungarian Matching): We employed the Hungarian Algorithm to solve the linear assignment problem, matching objects between the two images based on intersection-over-union (IoU) and spatial distance. This yields a feature vector representing the global similarity and specific object displacements.
+ * **Feature Extraction (Hungarian Matching):** We employed the Hungarian Algorithm to solve the linear assignment problem, matching objects between the two images based on intersection-over-union (IoU) and spatial distance. This yields a feature vector representing the global similarity and specific object displacements.
 
-* Binary Classifier: A Logistic Regression model classifies the extracted feature vector. It outputs a probability score determining whether the detected changes are "Substantial" (requiring alerts) or "Non-Substantial" (cosmetic or minor), optimized with a decision threshold of 0.3 for maximum recall.
+ * **Binary Classifier:** A Logistic Regression model classifies the extracted feature vector. It outputs a probability score determining whether the detected changes are "Substantial" (requiring alerts) or "Non-Substantial" (cosmetic or minor), optimized with a decision threshold of 0.3 for maximum recall.
 
 
 # 8. Training process and parameters
 
-1. Object Detector Fine-tuning (DETR)
+1. **Object Detector Fine-tuning (DETR)**
 We utilized a pre-trained DETR (ResNet-50 backbone) model and fine-tuned it on a custom annotated dataset of architectural floor plans(COCO).
 
-* Objective: To recognize specific classes: Stove, Sink, Toilet, Door and Closet.
+ * **Objective:** To recognize specific classes: Stove, Sink, Toilet, Door and Closet.
 
-* Optimization: The model was trained using the Hungarian Loss (combining classification and bounding box regression loss) to handle set prediction.
+ * **Optimization:** The model was trained using the Hungarian Loss (combining classification and bounding box regression loss) to handle set prediction.
 
-2. Change Classifier Training
+2. **Change Classifier Training**
 The binary classification model ("Substantial" vs. "Non-Substantial") was trained on the synthetically generated dataset.
 
-* Dataset Split: The dataset of 3,264 pairs was split into 80% Training (2,578 pairs) and 20% Validation (686 pairs), ensuring no data leakage between scene groups.
+* **Dataset Split:** The dataset of 3,264 pairs was split into 80% Training (2,578 pairs) and 20% Validation (686 pairs), ensuring no data leakage between scene groups.
 
-* Feature Engineering: For every image pair, we computed a feature vector based on the Hungarian Matching cost matrix between the "Before" and "After" detections. Key hyperparameters included:
+* **Feature Engineering:** For every image pair, we computed a feature vector based on the Hungarian Matching cost matrix between the "Before" and "After" detections. Key hyperparameters included:
 
-  * Label Mismatch Penalty: 0.8 (Strongly penalizes matching different object types).
+  * **Label Mismatch Penalty:** 0.8 (Strongly penalizes matching different object types).
 
-  *  Center Distance Penalty: 0.15 (Penalizes objects that moved far apart).
+  *  **Center Distance Penalty:** 0.15 (Penalizes objects that moved far apart).
 
-  * Detection Confidence Threshold: 0.25.
+  * **Detection Confidence Threshold:** 0.25.
 
-* Model Configuration: A Logistic Regression classifier was trained with:
+* **Model Configuration:** A Logistic Regression classifier was trained with:
 
  * ```class_weight="balanced"``` to handle potential class imbalances.
 
  * ```max_iter=2000``` to ensure convergence.
 
-* Threshold Optimization: We performed a precision-recall sweep on the validation set. While the standard decision threshold is 0.5, we identified an optimal threshold of 0.30.
+* **Threshold Optimization:** We performed a precision-recall sweep on the validation set. While the standard decision threshold is 0.5, we identified an optimal threshold of 0.30.
 
- * Result: This adjustment improved the Recall to 96% (virtually eliminating missed substantial changes) and achieved a final **F1-Score of 0.81**.
+ * **Result:** This adjustment improved the Recall to 96% (virtually eliminating missed substantial changes) and achieved a final **F1-Score of 0.81**.
 
 
 # 9. Metrics 
@@ -214,7 +218,7 @@ The following models are used in the project:
 
 ##  Automatic Installation (Recommended)
 
-Run the setup script from the project root directory:
+Run the setup script from the project root directory in the terminal:
 
 ```bash
 setup_env.bat
