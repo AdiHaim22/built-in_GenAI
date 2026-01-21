@@ -13,7 +13,7 @@ Homebuyers lack the tools and expertise to accurately identify structural or lay
 
 # 4. Datasets used or collected
 
-* We used [FloorPlansV2]('https://huggingface.co/datasets/jprve/FloorPlansV2') dataset after flitering 
+* We used [FloorPlansV2](https://huggingface.co/datasets/jprve/FloorPlansV2) dataset after flitering 
 * We generated before/after dataset for the classification pipeline
 
 # 5. Data augmentation and generation methods
