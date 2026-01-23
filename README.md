@@ -94,11 +94,11 @@ The binary classification model ("Substantial" vs. "Non-Substantial") was traine
 
 * **Feature Engineering:** For every image pair, we computed a feature vector based on the Hungarian Matching cost matrix between the "Before" and "After" detections. Key hyperparameters included:
 
-  * **Label Mismatch Penalty:** 0.8 (Strongly penalizes matching different object types).
+  * **Label Mismatch Penalty:** A high penalty was assigned to differing object types to strictly enforce that the system matches objects of the same class (e.g., ensuring a stove is not matched with a toilet).
 
-  *  **Center Distance Penalty:** 0.15 (Penalizes objects that moved far apart).
+  * **Center Distance Penalty:** A low distance weight was used to allow for flexibility, recognizing that objects often shift positions slightly during legitimate renovations.
 
-  * **Detection Confidence Threshold:** 0.25.
+  * **Detection Confidence Threshold:** A permissive (low) threshold was selected to prioritize Recall, ensuring that even faint or sketched objects are detected and analyzed rather than ignored.
 
 * **Model Configuration:** A Logistic Regression classifier was trained with:
 
