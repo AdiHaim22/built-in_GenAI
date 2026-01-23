@@ -1,10 +1,18 @@
+# Built-in – A GenAI-Based System for Verifying Compliance Between Floorplan Versions
+
+Automated detection and classification of substantial architectural changes using synthetic data and computer vision.
+
+
+
 # 1. Project Motivation
 
 Comparing different versions of the same floorplan is difficult for buyers and may lead to financial and legal risks. 
+Therefore, we decided to create an automated system that highlights and classifies changes between floorplan versions in a clear and reliable way.
 
 # 2. Problem statement 
 
-Homebuyers lack the tools and expertise to accurately identify structural or layout changes between initial sales plans and final construction drawings, exposing them to significant financial loss and legal disputes.
+While engineers and construction companies possess the expertise to interpret floorplan changes, regular homebuyers typically lack both the professional knowledge and the appropriate tools to accurately compare different versions of the same floorplan. As a result, consumers are often unable to identify whether observed differences represent meaningful layout changes.
+This project aims to provide an automated tool designed to assist consumers in identifying and understanding changes between floorplan versions.
 
 # 3. Visual abstract
 
@@ -13,8 +21,8 @@ Homebuyers lack the tools and expertise to accurately identify structural or lay
 
 # 4. Datasets used or collected
 
-* We used [FloorPlansV2](https://huggingface.co/datasets/jprve/FloorPlansV2) dataset after flitering 
-* We generated before/after dataset for the classification pipeline
+* We used [FloorPlansV2](https://huggingface.co/datasets/jprve/FloorPlansV2) dataset as the base data source, applying filtering and preprocessing steps.
+* On top of this data, we generated a synthetic before/after dataset containing both substantial and non-substantial changes for classification.
 
 # 5. Data augmentation and generation methods
 
@@ -34,9 +42,13 @@ Synthetic Data Generation Pipeline To overcome the scarcity of labeled "Before/A
 
 4. **Automated Labeling:** Each generated pair was automatically labeled as "Substantial" or "Non-Substantial" based on the manipulation type, creating a fully annotated dataset for supervised learning.
 
- * **Substantial changes:** remove sink, stove, toilet. and replace sink to stove and toilet to stove .
+ * **Substantial changes:** remove sink, remove stove, remove toilet, replace sink with stove and replace toilet with stove .
  
- * **Non-Substantial changes:** add closet at random location, remove door, remove 2 sided door and remove closet .
+ * **Non-Substantial changes:** add closet at random location, remove 1 sided door, remove 2 sided door and remove closet .
+
+# workflow visualization:
+<img width="1136" height="616" alt="image" src="https://github.com/user-attachments/assets/1f6f8ae6-998c-4891-a4f9-2df4a9364bb8" />
+<img width="1139" height="602" alt="image" src="https://github.com/user-attachments/assets/6538d53a-ac6b-4028-99ee-16ddf68e9123" />
 
 
 # 6. Input/Output Examples
@@ -63,7 +75,7 @@ The core system for detecting discrepancies in real-world scenarios operates as 
 
  * **Feature Extraction (Hungarian Matching):** We employed the Hungarian Algorithm to solve the linear assignment problem, matching objects between the two images based on intersection-over-union (IoU) and spatial distance. This yields a feature vector representing the global similarity and specific object displacements.
 
- * **Binary Classifier:** A Logistic Regression model classifies the extracted feature vector. It outputs a probability score determining whether the detected changes are "Substantial" (requiring alerts) or "Non-Substantial" (cosmetic or minor), optimized with a decision threshold of 0.3 for maximum recall.
+ * **Binary Classifier:** A Logistic Regression model classifies the extracted feature vector. It outputs a probability score determining whether the detected changes are "Substantial" (requiring alerts) or "Non-Substantial" (cosmetic or minor), optimized with a decision threshold of 0.3 for maximum recall & F1 score.
 
 
 # 8. Training process and parameters
@@ -71,14 +83,14 @@ The core system for detecting discrepancies in real-world scenarios operates as 
 1. **Object Detector Fine-tuning (DETR)**
 We utilized a pre-trained DETR (ResNet-50 backbone) model and fine-tuned it on a custom annotated dataset of architectural floor plans(COCO).
 
- * **Objective:** To recognize specific classes: Stove, Sink, Toilet, Door and Closet.
+ * **Objective:** To recognize specific classes: Stove, Sink, Toilet, 1 Sided Door, 2 Sided Door and Closet.
 
  * **Optimization:** The model was trained using the Hungarian Loss (combining classification and bounding box regression loss) to handle set prediction.
 
 2. **Change Classifier Training**
 The binary classification model ("Substantial" vs. "Non-Substantial") was trained on the synthetically generated dataset.
 
-* **Dataset Split:** The dataset of 3,264 pairs was split into 80% Training (2,578 pairs) and 20% Validation (686 pairs), ensuring no data leakage between scene groups.
+* **Dataset Split:** The dataset of floorplans pairs was split into 80% Training and 20% Validation, ensuring no data leakage between scene groups.
 
 * **Feature Engineering:** For every image pair, we computed a feature vector based on the Hungarian Matching cost matrix between the "Before" and "After" detections. Key hyperparameters included:
 
@@ -105,9 +117,9 @@ To evaluate the performance of the Change Type Classifier, we utilized standard 
 
 * **Recall (Sensitivity):** This was our primary success metric. In the context of floor plan verification, missing a "Substantial Change" (e.g., a missing stove) poses a significant legal risk.
 
- * Formula: $Recall = \frac{TP}{TP + FN}$
+ * Formula: $Recall = \frac{TP}{TP + FN }$
 
- * Result: By optimizing the decision threshold to 0.30, we achieved a Recall of **96.4%**, ensuring that nearly all critical discrepancies are flagged.
+ * Result: By optimizing the decision threshold to 0.30, we achieved a Recall of **96.2%**, ensuring that nearly all critical discrepancies are flagged.
 
 * **F1-Score:** We used the F1-Score (the harmonic mean of Precision and Recall) to determine the optimal decision threshold during the training sweep.
 
@@ -121,7 +133,8 @@ To evaluate the performance of the Change Type Classifier, we utilized standard 
 
 * **Confusion Matrix:** Analyzed to visualize the trade-off between "False Alarms" (False Positives) and "Missed Detections" (False Negatives) at the chosen threshold.
 
-![](Visuals\confusion_matrix.png)
+<img width="502" height="433" alt="image" src="https://github.com/user-attachments/assets/106a1556-829c-4fcf-8ca3-8ccc4115f7d7" />
+
 
 
 # 10. Results
@@ -130,21 +143,21 @@ We evaluated the proposed change detection pipeline on a held-out validation set
 
 1. Classification Performance The Logistic Regression classifier, operating on features extracted from the Hungarian Matching algorithm, demonstrated robust performance. Through a threshold optimization sweep, we identified 0.30 as the optimal decision boundary (default=0.5), yielding the following results:
 
-* **Recall (Sensitivity): 96.4%** for substantial changes. This high recall confirms the system's reliability as a safety net, missing fewer than 4% of critical alterations.
+* **Recall (Sensitivity): 96.2%** for substantial changes. This high recall confirms the system's reliability as a safety net, missing fewer than 4% of critical alterations.
 
-* **F1-Score: 0.81**, indicating a strong balance between precision and recall.
+* **F1-Score: 81.5%**, indicating a strong balance between precision and recall.
 
-* **Precision: 70.1%**, reflecting a deliberate trade-off where the system accepts a higher false-positive rate (alerting on some minor changes) to ensure no critical changes are overlooked.
+* **Precision: 70.7%**, reflecting a deliberate trade-off where the system accepts a higher false-positive rate (alerting on some minor changes) to ensure no critical changes are overlooked.
 
 2. Confusion Matrix Analysis At the chosen threshold of 0.30:
 
-* **True Positives (Correct Alerts):** 371 pairs.
+* **True Positives (Correct Alerts):** 1790 pairs.
 
-* **False Negatives (Missed Alerts):** Only 14 pairs.
+* **False Negatives (Missed Alerts):** 71 pairs.
 
-* **True Negatives (Correct Rejections):** 143 pairs.
+* **True Negatives (Correct Rejections):** 663 pairs.
 
-* **False Positives (False Alarms):** 158 pairs.
+* **False Positives (False Alarms):** 740 pairs.
 
 3. **Qualitative Assessment** Visual inspection of the output confirms that the pipeline successfully localizes changes. The system accurately highlights removed or shifted objects (e.g., stoves, toilets) with bounding boxes, while correctly ignoring minor discrepancies such as slight pixel noise or irrelevant background shifts.
 
