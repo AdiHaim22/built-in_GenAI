@@ -13,6 +13,7 @@ MODELS/
 outputs_toilet_to_stove/
 Models/
 Code/Unneeded_Codes
+Code\MainPipeline.ipynb
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
